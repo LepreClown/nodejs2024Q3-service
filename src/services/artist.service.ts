@@ -1,9 +1,4 @@
-import {
-  forwardRef,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Artist } from '../types/artist.types';
 import { CreateArtistDto, UpdateArtistDto } from '../dto/artist.dto';
 import { v4 as uuidv4 } from 'uuid';
@@ -25,10 +20,10 @@ export class ArtistService {
     return artist;
   }
 
-  async createArtist(createArtistDto: CreateArtistDto): Promise<Artist> {
+  async createArtist(dto: CreateArtistDto): Promise<Artist> {
     const newArtist: Artist = {
       id: uuidv4(),
-      ...createArtistDto,
+      ...dto,
     };
 
     this.artists.push(newArtist);
@@ -37,19 +32,22 @@ export class ArtistService {
 
   async updateArtistById(
     id: string,
-    updateArtistDto: UpdateArtistDto,
+    { name, grammy }: UpdateArtistDto,
   ): Promise<Artist> {
     const artist = this.artists.find((artist) => artist.id === id);
 
     if (!artist) {
       throw new NotFoundException(`Artist with ID ${id} not found`);
     }
-    if (updateArtistDto.name !== undefined) {
-      artist.name = updateArtistDto.name;
+
+    if (name !== undefined) {
+      artist.name = name;
     }
-    if (updateArtistDto.grammy !== undefined) {
-      artist.grammy = updateArtistDto.grammy;
+
+    if (grammy !== undefined) {
+      artist.grammy = grammy;
     }
+
     return artist;
   }
 
