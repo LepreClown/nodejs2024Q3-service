@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-
 import { UserModule } from './modules/user.module';
 import { AlbumModule } from './modules/album.module';
 import { ArtistModule } from './modules/artist.module';
