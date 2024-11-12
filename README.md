@@ -1,14 +1,26 @@
 # Home Library Service
+A NestJS RESTful API service for managing a personal music library.
 
-## Prerequisites
+## Project Structure
 
-- Git - [Download & Install Git](https://git-scm.com/downloads).
-- Node.js - [Download & Install Node.js](https://nodejs.org/en/download/) and the npm package manager.
+The application is organized into the following main folders:
 
+- **controllers/**: Defines HTTP request handlers and routing.
+- **dto/**: Data Transfer Objects for request validation and data structure.
+- **modules/**: NestJS module definitions and configurations.
+- **services/**: Implements business logic and data handling.
+- **types/**: TypeScript interfaces and types for structured data.
+
+This modular structure helps maintain clean, organized, and scalable code.
 ## Downloading
 
 ```
 git clone {repository URL}
+```
+## Change branch
+
+```
+git checkout develop
 ```
 
 ## Installing NPM modules
@@ -16,16 +28,17 @@ git clone {repository URL}
 ```
 npm install
 ```
+## Create .env variables with .env.example content
+
+```
+PORT=4000
+```
 
 ## Running application
 
 ```
 npm start
 ```
-
-After starting the app on port (4000 as default) you can open
-in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
-For more information about OpenAPI/Swagger please visit https://swagger.io/.
 
 ## Testing
 
@@ -41,18 +54,6 @@ To run only one of all test suites
 
 ```
 npm run test -- <path to suite>
-```
-
-To run all test with authorization
-
-```
-npm run test:auth
-```
-
-To run only specific test suite with authorization
-
-```
-npm run test:auth -- <path to suite>
 ```
 
 ### Auto-fix and format
