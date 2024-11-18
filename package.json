@@ -13,6 +13,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
+    "start:dev:migrate": "npx prisma migrate dev && npm run start:dev",
     "docker:hub:up": "docker compose up",
     "docker:hub:down": "docker compose down",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",

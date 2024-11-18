@@ -20,7 +20,7 @@ git clone {repository URL}
 ## Change branch
 
 ```
-git checkout develop
+git checkout develop-part-2
 ```
 
 ## Installing NPM modules
@@ -38,6 +38,25 @@ PORT=4000
 
 ```
 npm start
+```
+
+## Running application
+
+Start:
+
+```
+npm run docker:dev:up
+```
+
+Stop and remove docker containers:
+
+```
+npm run docker:dev:down
+```
+Start with database migrations:
+
+```
+npm run start:dev:migrate
 ```
 
 ## Testing
