@@ -13,3 +13,5 @@ export interface Favorites {
   albums: string[];
   tracks: string[];
 }
+
+export type TFavorite = 'artist' | 'album' | 'track';

@@ -18,7 +18,7 @@ export class ArtistController {
   constructor(private readonly artistService: ArtistService) {}
 
   @Get()
-  getArtists() {
+  async getArtists() {
     return this.artistService.getArtists();
   }
 
@@ -46,7 +46,7 @@ export class ArtistController {
   @HttpCode(204)
   async removeById(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-  ): Promise<void> {
+  ) {
     return this.artistService.removeById(id);
   }
 }

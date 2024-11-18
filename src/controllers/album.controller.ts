@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
@@ -16,8 +17,9 @@ import { CreateAlbumDto, UpdateAlbumDto } from '../dto/album.dto';
 @Controller('album')
 export class AlbumController {
   constructor(private readonly albumService: AlbumService) {}
+
   @Get()
-  getAlbums(): Album[] {
+  async getAlbums() {
     return this.albumService.getAlbums();
   }
 
@@ -43,7 +45,9 @@ export class AlbumController {
 
   @Delete(':id')
   @HttpCode(204)
-  removeById(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
+  async removeById(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ) {
     return this.albumService.removeById(id);
   }
 }

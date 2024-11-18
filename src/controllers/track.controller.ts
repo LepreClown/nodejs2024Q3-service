@@ -18,7 +18,7 @@ export class TrackController {
   constructor(private readonly trackService: TrackService) {}
 
   @Get()
-  getTracks() {
+  async getTracks() {
     return this.trackService.getTracks();
   }
 
@@ -44,9 +44,9 @@ export class TrackController {
 
   @Delete(':id')
   @HttpCode(204)
-  removeById(
+  async removeById(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-  ): Promise<void> {
+  ) {
     return this.trackService.removeById(id);
   }
 }
