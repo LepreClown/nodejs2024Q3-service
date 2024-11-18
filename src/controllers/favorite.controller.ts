@@ -26,7 +26,7 @@ export class FavoriteController {
   @HttpCode(HttpStatus.CREATED)
   async addFavorite(
     @Param('type') type: TFavorite,
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ) {
     await this.ensureExists(id, type);
     return this.favorites.addFavoriteItem(id, type);
@@ -36,7 +36,7 @@ export class FavoriteController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async removeFavorite(
     @Param('type') type: TFavorite,
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ) {
     await this.ensureInFavorites(id, type);
     return this.favorites.removeFavoriteItem(id, type);

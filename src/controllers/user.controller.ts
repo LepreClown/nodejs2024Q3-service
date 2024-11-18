@@ -24,7 +24,9 @@ export class UserController {
   }
 
   @Get(':id')
-  async getUserById(@Param('id', ParseUUIDPipe) id: string) {
+  async getUserById(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ) {
     const user = await this.userService.getUserById(id);
     if (!user) {
       throw new HttpException(
@@ -43,7 +45,7 @@ export class UserController {
 
   @Put(':id')
   async updateById(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() dto: UpdateUserPasswordDto,
   ) {
     return this.userService.updateUserPassword(id, dto);
@@ -51,7 +53,9 @@ export class UserController {
 
   @Delete(':id')
   @HttpCode(204)
-  async removeById(@Param('id', ParseUUIDPipe) id: string) {
+  async removeById(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ) {
     return this.userService.removeById(id);
   }
 }

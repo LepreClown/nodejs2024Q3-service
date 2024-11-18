@@ -1,9 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Artist } from '../types/artist.types';
 import { CreateArtistDto, UpdateArtistDto } from '../dto/artist.dto';
-import { v4 as uuidv4 } from 'uuid';
 import { PrismaService } from './prisma.service';
-import { rethrow } from '@nestjs/core/helpers/rethrow';
 
 @Injectable()
 export class ArtistService {

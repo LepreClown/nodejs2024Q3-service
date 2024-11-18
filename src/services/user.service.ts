@@ -4,7 +4,6 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
 import { User } from '../types/user.types';
 import { CreateUserDto, UpdateUserPasswordDto } from '../dto/user.dto';
 import { PrismaService } from './prisma.service';
