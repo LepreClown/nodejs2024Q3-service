@@ -1,0 +1,38 @@
+services:
+  db:
+    image:  lepreclown/rs_school-part-2:db
+    container_name: 'db-container'
+    env_file:
+      - .env
+    ports:
+      - '${POSTGRES_PORT}:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - api_db_network
+
+  app:
+    image: lepreclown/rs_school-part-2:app
+    container_name: 'api-container'
+    ports:
+      - '$PORT:$PORT'
+    tty: true
+    stdin_open: true
+    depends_on:
+      - db
+    restart: on-failure
+    networks:
+      - api_db_network
+    env_file:
+      - .env
+    volumes:
+      - ./src:/app/src
+
+volumes:
+  postgres_data:
+
+networks:
+  api_db_network:
+    driver: bridge
+    name: 'api_db_network'
