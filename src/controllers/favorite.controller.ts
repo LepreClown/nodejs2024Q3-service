@@ -18,13 +18,12 @@ export class FavoriteController {
   constructor(private readonly favorites: FavoriteService) {}
 
   @Get()
-  async fetchAll() {
+  async getAllFavorites() {
     return this.favorites.fetchAllFavorites();
   }
 
   @Post(':type/:id')
-  @HttpCode(HttpStatus.CREATED)
-  async addFavorite(
+  async createFavorite(
     @Param('type') type: TFavorite,
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ) {
@@ -33,7 +32,7 @@ export class FavoriteController {
   }
 
   @Delete(':type/:id')
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(204)
   async removeFavorite(
     @Param('type') type: TFavorite,
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
