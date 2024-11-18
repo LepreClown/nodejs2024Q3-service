@@ -1,7 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
-import { AlbumModule } from './album.module';
-import { ArtistModule } from './artist.module';
-import { TrackModule } from './track.module';
+import { Module } from '@nestjs/common';
 import { FavoriteController } from '../controllers/favorite.controller';
 import { FavoriteService } from '../services/favorite.service';
 
