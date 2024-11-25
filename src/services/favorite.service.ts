@@ -1,22 +1,30 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 import { TFavorite } from '../types/favorite.types';
+import { LoggingService } from './logging.service';
 
 @Injectable()
 export class FavoriteService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly loggingService: LoggingService,
+  ) {}
 
   async fetchAllFavorites() {
+    this.loggingService.log('Fetching all favorite items');
     const [tracks, artists, albums] = await Promise.all([
       this.retrieveFavoritesByType('track'),
       this.retrieveFavoritesByType('artist'),
       this.retrieveFavoritesByType('album'),
     ]);
-
+    this.loggingService.log(
+      `Fetched favorites - Tracks: ${tracks.length}, Artists: ${artists.length}, Albums: ${albums.length}`,
+    );
     return { tracks, artists, albums };
   }
 
   private async retrieveFavoritesByType(type: TFavorite) {
+    this.loggingService.log(`Fetching favorites of type: ${type}`);
     const favorites = {
       track: () =>
         this.prismaService.favoriteTrack
@@ -32,14 +40,22 @@ export class FavoriteService {
           .then((items) => items.map((item) => item.album)),
     };
 
-    return favorites[type] ? favorites[type]() : [];
+    const result = favorites[type] ? await favorites[type]() : [];
+    this.loggingService.log(`Fetched ${result.length} ${type} items`);
+    return result;
   }
 
-  async itemExists(id: string, type: TFavorite) {
-    return Boolean(await this.findItem(id, type));
+  async itemExists(id: string, type: TFavorite): Promise<boolean> {
+    this.loggingService.log(`Checking if item exists: ID ${id}, Type ${type}`);
+    const exists = Boolean(await this.findItem(id, type));
+    this.loggingService.log(
+      `Item ${exists ? 'exists' : 'does not exist'}: ID ${id}, Type ${type}`,
+    );
+    return exists;
   }
 
   private async findItem(id: string, type: TFavorite) {
+    this.loggingService.log(`Finding item: ID ${id}, Type ${type}`);
     const lookup = {
       artist: () => this.prismaService.artist.findUnique({ where: { id } }),
       album: () => this.prismaService.album.findUnique({ where: { id } }),
@@ -50,6 +66,9 @@ export class FavoriteService {
   }
 
   async isFavorite(id: string, type: TFavorite) {
+    this.loggingService.log(
+      `Checking if item is favorite: ID ${id}, Type ${type}`,
+    );
     const lookup = {
       artist: () =>
         this.prismaService.favoriteArtist.findUnique({
@@ -61,17 +80,28 @@ export class FavoriteService {
         this.prismaService.favoriteTrack.findUnique({ where: { trackId: id } }),
     };
 
-    return lookup[type] ? lookup[type]() : null;
+    const favorite = lookup[type] ? await lookup[type]() : null;
+    this.loggingService.log(
+      `Item ${favorite ? 'is' : 'is not'} a favorite: ID ${id}, Type ${type}`,
+    );
+    return favorite;
   }
 
   async addFavoriteItem(id: string, type: TFavorite) {
+    this.loggingService.log(`Adding item to favorites: ID ${id}, Type ${type}`);
     if (await this.isFavorite(id, type)) {
+      this.loggingService.warn(
+        `Item already in favorites: ID ${id}, Type ${type}`,
+      );
       return { message: 'Item already in favorites' };
     }
-    return this.saveFavorite(id, type);
+    const savedFavorite = await this.saveFavorite(id, type);
+    this.loggingService.log(`Item added to favorites: ID ${id}, Type ${type}`);
+    return savedFavorite;
   }
 
   private async saveFavorite(id: string, type: TFavorite) {
+    this.loggingService.log(`Saving item to favorites: ID ${id}, Type ${type}`);
     const actions = {
       artist: () =>
         this.prismaService.favoriteArtist.create({ data: { artistId: id } }),
@@ -82,6 +112,7 @@ export class FavoriteService {
     };
 
     if (!actions[type]) {
+      this.loggingService.error(`Unsupported type: ${type}`);
       throw new Error(`Unsupported type: ${type}`);
     }
 
@@ -89,6 +120,9 @@ export class FavoriteService {
   }
 
   async removeFavoriteItem(id: string, type: TFavorite) {
+    this.loggingService.log(
+      `Removing item from favorites: ID ${id}, Type ${type}`,
+    );
     const deleteActions = {
       artist: () =>
         this.prismaService.favoriteArtist.delete({ where: { artistId: id } }),
@@ -99,9 +133,13 @@ export class FavoriteService {
     };
 
     if (!deleteActions[type]) {
+      this.loggingService.error(`Unsupported type: ${type}`);
       throw new Error(`Unsupported type: ${type}`);
     }
 
     await deleteActions[type]();
+    this.loggingService.log(
+      `Item removed from favorites: ID ${id}, Type ${type}`,
+    );
   }
 }
