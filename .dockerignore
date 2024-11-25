@@ -1,0 +1,9 @@
+/dist
+/node_modules
+/.git
+.env
+.env.example
+.prettierrc
+.gitignore
+.dockerignore
+README.md
