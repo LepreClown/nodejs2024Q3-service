@@ -8,6 +8,7 @@ import { PrismaModule } from './modules/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import { LoggingService } from './services/logging.service';
 import { LoggingMiddleware } from './middleware/logging.middleware';
+import { AuthModule } from './modules/auth.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { LoggingMiddleware } from './middleware/logging.middleware';
     ArtistModule,
     FavoriteModule,
     TrackModule,
+    AuthModule,
     UserModule,
     ConfigModule.forRoot({
       isGlobal: true,

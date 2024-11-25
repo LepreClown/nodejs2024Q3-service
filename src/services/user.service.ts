@@ -36,6 +36,15 @@ export class UserService {
     this.loggingService.log(`User with ID ${id} fetched`);
     return user;
   }
+
+  async getUserByLogin(login: string) {
+    this.loggingService.log(`Fetching user with ID ${login}`);
+    const user = await this.prismaService.user.findUnique({ where: { login } });
+
+    this.loggingService.log(`User with ID ${login} fetched`);
+    return user;
+  }
+
   async createUser(dto: CreateUserDto): Promise<Omit<User, 'password'>> {
     this.loggingService.log('Creating a new user');
     if (!dto.login || !dto.password) {

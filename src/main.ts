@@ -5,6 +5,7 @@ import * as dotenv from 'dotenv';
 import { ValidationPipe } from '@nestjs/common';
 import { LoggingService } from './services/logging.service';
 import { ConfigService } from '@nestjs/config';
+import { JwtGuard } from './jwt/jwt.guard';
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ async function bootstrap() {
   app.useLogger(loggingService);
 
   const document = SwaggerModule.createDocument(app, defaultConfig);
+  app.useGlobalGuards(new JwtGuard());
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
