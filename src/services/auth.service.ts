@@ -2,73 +2,98 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { UserService } from './user.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { ConfigService } from '@nestjs/config';
 import { AuthDto } from '../dto/auth.dto';
 
 @Injectable()
 export class AuthService {
-  private readonly refreshTokenSecret: string;
-  private readonly refreshTokenExpiration: string;
-  private readonly saltRounds: number;
-
   constructor(
-    private readonly userService: UserService,
+    private readonly usersService: UserService,
     private readonly jwtService: JwtService,
   ) {}
 
-  async signup(signupDto: AuthDto) {
-    const hashedPassword = await this.hashPassword(signupDto.password);
-    const userPayload = { ...signupDto, password: hashedPassword };
-    return this.userService.createUser(userPayload);
+  async signup(dto: AuthDto) {
+    const userPayload = await this.prepareUserPayload(dto);
+
+    return this.usersService.createUser(userPayload);
   }
 
-  async login(loginDto: AuthDto) {
-    const user = await this.userService.getUserByLogin(loginDto.login);
+  async login(dto: AuthDto) {
+    const user = await this.validateUserCredentials(dto);
+    const tokens = this.generateTokens(user);
 
-    if (
-      !user ||
-      !(await this.isPasswordValid(loginDto.password, user.password))
-    ) {
+    return tokens;
+  }
+
+  async refresh(refreshToken: string) {
+    const payload = this.decodeRefreshToken(refreshToken);
+    return this.generateTokens(payload);
+  }
+
+  private async prepareUserPayload(dto: AuthDto) {
+    const hashedPassword = await bcrypt.hash(
+      dto.password,
+      this.getSaltRounds(),
+    );
+    return { ...dto, password: hashedPassword };
+  }
+
+  private async validateUserCredentials(dto: AuthDto) {
+    const user = await this.usersService.getUserByLogin(dto.login);
+
+    if (!user || !(await this.isPasswordValid(dto.password, user.password))) {
       throw new ForbiddenException(
         'Invalid login credentials. Please try again.',
       );
     }
 
-    const payload = this.createJwtPayload(user);
-    return this.generateTokens(payload);
+    return user;
   }
 
-  async refresh(refreshToken: string) {
+  private async isPasswordValid(plainPassword: string, hashedPassword: string) {
+    return bcrypt.compare(plainPassword, hashedPassword);
+  }
+
+  private generateTokens(user): {
+    accessToken: string;
+    refreshToken: string;
+  } {
+    const payload = { userId: user.id, login: user.login };
+    return {
+      accessToken: this.createAccessToken(payload),
+      refreshToken: this.createRefreshToken(payload),
+    };
+  }
+
+  private createAccessToken(payload) {
+    return this.jwtService.sign(payload);
+  }
+
+  private createRefreshToken(payload) {
+    return this.jwtService.sign(payload, {
+      secret: this.getRefreshTokenSecret(),
+      expiresIn: this.getRefreshTokenExpiration(),
+    });
+  }
+
+  private decodeRefreshToken(token: string) {
     try {
-      const payload = this.verifyRefreshToken(refreshToken);
-      return this.generateTokens(payload);
+      return this.jwtService.verify(token, {
+        secret: this.getRefreshTokenSecret(),
+      });
     } catch {
       throw new ForbiddenException('The refresh token is invalid or expired.');
     }
   }
 
-  private async hashPassword(password: string): Promise<string> {
-    return bcrypt.hash(password, this.saltRounds);
+  private getSaltRounds(): number {
+    return Number(process.env.CRYPT_SALT) || 10;
   }
-  private async isPasswordValid(
-    plainPassword: string,
-    hashedPassword: string,
-  ): Promise<boolean> {
-    return bcrypt.compare(plainPassword, hashedPassword);
-  }
-  private createJwtPayload(user: any): { userId: string; login: string } {
-    return { userId: user.id, login: user.login };
-  }
-  private generateTokens(payload: { userId: string; login: string }) {
-    const accessToken = this.jwtService.sign(payload);
-    const refreshToken = this.jwtService.sign(payload, {
-      secret: this.refreshTokenSecret,
-      expiresIn: this.refreshTokenExpiration,
-    });
 
-    return { accessToken, refreshToken };
+  private getRefreshTokenSecret(): string {
+    return process.env.JWT_SECRET_REFRESH_KEY;
   }
-  private verifyRefreshToken(token: string): any {
-    return this.jwtService.verify(token, { secret: this.refreshTokenSecret });
+
+  private getRefreshTokenExpiration(): string {
+    return process.env.TOKEN_REFRESH_EXPIRE_TIME || '7d';
   }
 }
