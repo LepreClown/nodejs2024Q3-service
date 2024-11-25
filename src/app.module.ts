@@ -1,10 +1,13 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { UserModule } from './modules/user.module';
 import { AlbumModule } from './modules/album.module';
 import { ArtistModule } from './modules/artist.module';
 import { FavoriteModule } from './modules/favorite.module';
 import { TrackModule } from './modules/track.module';
 import { PrismaModule } from './modules/prisma.module';
+import { ConfigModule } from '@nestjs/config';
+import { LoggingService } from './services/logging.service';
+import { LoggingMiddleware } from './middleware/logging.middleware';
 
 @Module({
   imports: [
@@ -14,6 +17,16 @@ import { PrismaModule } from './modules/prisma.module';
     FavoriteModule,
     TrackModule,
     UserModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
   ],
+  providers: [LoggingService],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(LoggingMiddleware)
+      .forRoutes({ path: '*', method: RequestMethod.ALL });
+  }
+}
